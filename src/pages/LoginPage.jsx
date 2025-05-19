@@ -11,27 +11,21 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Stop page reload
+    e.preventDefault(); // Prevent page reload
+
     try {
+      // Call relative path—let Nginx proxy /api to your backend
       const response = await axios.post(
-        'http://127.0.0.1:8000/api/login',
-        {
-          email: email,
-          password: password,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+        `/api/login`,
+        { email, password }
       );
 
-      if (response.data.token) {
+      if (response.data.success && response.data.token) {
         localStorage.setItem('token', response.data.token);
         console.log('Login successful!');
         navigate('/dashboard');
       } else {
-        setError('Invalid email or password.');
+        setError(response.data.message || 'Invalid email or password.');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -42,13 +36,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-md p-8 space-y-6">
-        <h2 className="text-center text-2xl font-bold text-gray-900">Sign in to your account</h2>
+        <h2 className="text-center text-2xl font-bold text-gray-900">
+          Sign in to your account
+        </h2>
 
         {error && <p className="text-center text-red-500">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email address</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
             <input
               type="email"
               value={email}
@@ -59,7 +57,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -80,12 +80,12 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?{' '}
+          Don’t have an account?{' '}
           <Link to="/signup" className="text-blue-600 hover:underline">
             Sign up
           </Link>
         </p>
       </div>
     </div>
-  );
+);
 }
